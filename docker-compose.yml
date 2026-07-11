@@ -1,0 +1,44 @@
+# ============================================================
+# Docker Compose — DevOps & Infra 知识库
+# ============================================================
+#
+# 使用方式:
+#   docker-compose up -d          # 启动（后台运行）
+#   docker-compose down           # 停止
+#   docker-compose logs -f        # 查看日志
+#   docker-compose build --no-cache  # 重新构建
+#
+# 持久化:
+#   raw/  — 原始文件目录（上传的文件保存在这里）
+#   wiki/ — 生成的知识库内容
+#
+# 数据默认保存在 ./data/ 目录下（与项目同级）
+
+version: "3.8"
+
+services:
+  knowledge-base:
+    build: .
+    container_name: devops-kb
+    ports:
+      - "8000:8000"
+    volumes:
+      # 持久化：知识数据和原始文件
+      - ./data/raw:/app/raw
+      - ./data/wiki:/app/wiki
+      # 配置文件（可选挂载以自定义）
+      - ./schema:/app/schema:ro
+      # Skill 文件（容器自动生成，也可挂载出来查看）
+      - ./data/skills:/app/skills
+    environment:
+      # LLM API Keys（至少配一个）
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
