@@ -1,0 +1,25 @@
+A. 全文搜索引擎升级
+
+  当前用 SequenceMatcher 做字符串匹配。知识库超过 50 条后精度下降明显。接入 qmd（llm-wiki 推荐的 BM25 + 向量搜索 + LLM 重排序），或者用 sqlite-vec/chromadb 做本地向量搜索。
+
+B. Web 端直接导入（不依赖 LLM）
+
+  当前上传 → LLM 整理 → 入库。可以加一条路径：上传时如果格式已经符合模板，Engine 直接解析 frontmatter + Markdown 入库，跳过 LLM 步骤。LLM 不可用时也能导入。
+
+C. 知识版本 Diff 视图
+
+  raw add-only + 版本升级已经有了，但 Web 上只能看到最新版本。加一个版本历史页，展示 v1 → v2 → v3 的变更对比。
+
+ 扩展方向 /高成本
+
+D. 知识图谱可视化
+
+  用 D3.js 或 vis.js 渲染知识之间的 [[关联知识]] 链接关系，在 Web 首页展示一个交互式的节点图。Obsidian 的 Graph View 就是这个概念。
+
+E. 定时巡检 + 通知
+
+  kb.py check 做成 cron job，发现过期/孤立知识时通过 Slack Webhook 或邮件通知。
+
+F. 知识导出（PDF / 离线 HTML / Marp 幻灯片）
+
+  某个分类的所有知识一键打包成 PDF 手册或 Marp 演示文稿，方便离线查阅或分享给没有访问权限的人。
