@@ -253,6 +253,10 @@
   <a href="#llm-check">Health Check</a>
   <a href="#llm-setup">Configure LLM</a>
 
+  <div class="nav-section">Search</div>
+  <a href="#semantic-search">Semantic vs Keyword</a>
+  <a href="#rebuild-index">Rebuild Index</a>
+
   <div class="nav-section">Appendix</div>
   <a href="#categories">Categories</a>
   <a href="#template">Template Reference</a>
@@ -263,9 +267,9 @@
 
 <!-- ====== HERO ====== -->
 <div class="hero">
-  <div class="badge">v0.1.0 · LLM-Driven</div>
+  <div class="badge">v0.2.0 · Semantic Search · LLM-Driven</div>
   <h1>DevOps &amp; Infra Knowledge Base</h1>
-  <p>One knowledge base, two interfaces — browse in your browser, drive with LLM Skills. Covers daily infra ops, violation fixes, automation, and Harbor platform.</p>
+  <p>One knowledge base, two interfaces — browse in your browser, drive with LLM Skills. Search "site is down" and find "Nginx Recovery Procedure" — no keyword matching needed.</p>
 </div>
 
 <!-- ====== OVERVIEW ====== -->
@@ -274,6 +278,11 @@
 <p>Built on the <strong>llm-wiki</strong> framework, this knowledge base flips the traditional RAG model: instead of retrieving raw documents at query time, <strong>the LLM incrementally builds and maintains a persistent, structured wiki</strong> of interlinked markdown files. The knowledge is compiled once, kept current, and served to both humans and LLMs.</p>
 
 <div class="card-grid">
+  <div class="card">
+    <span class="icon">🔮</span>
+    <h4>Semantic Search</h4>
+    <p>Search "site is down" → finds "Nginx Recovery Procedure". AI understands meaning, not just keywords.</p>
+  </div>
   <div class="card">
     <span class="icon">🌐</span>
     <h4>Web Interface</h4>
@@ -539,9 +548,9 @@ OpenCode will call python kb.py ingest to complete the process.</pre>
 <ol class="step-list">
   <li><strong>Provide source content</strong> — paste text or specify a file path in <code>raw/</code></li>
   <li><strong>LLM structures it</strong> — extracts scenario, steps, verification, rollback; fills in missing parts</li>
-  <li><strong>Dedup check</strong> — semantic comparison against existing entries; decides new vs. version update</li>
-  <li><strong>Quality check</strong> — 3-tier validation; tells you exactly what's missing if it fails</li>
-  <li><strong>Ingestion complete</strong> — generates .md + .html + Skill file; updates index and log</li>
+  <li><strong>LLM writes to temp file</strong> — saves structured Frontmatter + Markdown as a temporary file</li>
+  <li><strong>CLI executes Pipeline</strong> — <code>python kb.py ingest raw/doc.md --content /tmp/llm-output.md</code></li>
+  <li><strong>Full Pipeline runs</strong> — dedup → QA → write wiki → update index → generate Skill → <strong>build vector index</strong></li>
 </ol>
 
 <!-- ====== LLM: SEARCH ====== -->
@@ -630,6 +639,63 @@ Skills directory: skills/</pre>
 <h3>OpenCode</h3>
 <pre># In OpenCode settings, specify the Skill path:
 Skills path: E:/Program Files/Claude/knowledge/skills</pre>
+
+<!-- ====== SEMANTIC SEARCH ====== -->
+<h2 id="semantic-search">Semantic Search vs Keyword Search</h2>
+
+<p>The knowledge base now uses <strong>sqlite-vec</strong> vector database. Every ingested entry is automatically indexed with AI embeddings — no more keyword matching.</p>
+
+<h3>Comparison</h3>
+
+<table>
+  <thead><tr><th>You search</th><th>Keyword (fallback)</th><th>Semantic (default)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>"site is down"</td>
+      <td>❌ No match — no entry contains "down"</td>
+      <td>✅ Finds "Nginx Recovery Procedure" (0.47)</td>
+    </tr>
+    <tr>
+      <td>"how to set up CI/CD"</td>
+      <td>❌ No match — knowledge uses "Jenkins deploy"</td>
+      <td>✅ Finds "Jenkins Deployment" (0.76)</td>
+    </tr>
+    <tr>
+      <td>"disk almost full"</td>
+      <td>⚠️ Low score — entry says "usage exceeds 80%"</td>
+      <td>✅ Finds "Disk Cleanup"</td>
+    </tr>
+    <tr>
+      <td>"nginx 502 error"</td>
+      <td>⚠️ Low — "502" not in summary</td>
+      <td>✅ Cross-language match (0.70)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note success">
+  <strong>💡 Dual-mode:</strong> Semantic search runs by default. If the vector database is unavailable, it automatically falls back to keyword matching. The experience is seamless.
+</div>
+
+<!-- ====== REBUILD INDEX ====== -->
+<h2 id="rebuild-index">Rebuild Vector Index</h2>
+
+<p>If the vector database is lost or corrupted, rebuild it from <code>wiki/*.md</code> files:</p>
+
+<pre># Rebuild the entire vector index
+python kb.py rebuild-index
+
+# Example output:
+# Rebuilding vector index...
+# ✓ Indexed: 42 entries
+#   infra-daily: 12
+#   infra-violation: 8
+#   automation: 15
+#   harbor: 7</pre>
+
+<div class="note warn">
+  <strong>💡 When to use:</strong> After initial deployment, if <code>data/knowledge_vec.db</code> is deleted, or after upgrading the embedding model.
+</div>
 
 <!-- ====== CATEGORIES ====== -->
 <h2 id="categories">Category Reference</h2>

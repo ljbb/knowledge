@@ -276,6 +276,10 @@
   <a href="#llm-check">检查状态 (kb-status)</a>
   <a href="#llm-setup">配置 LLM 环境</a>
 
+  <div class="nav-section">搜索</div>
+  <a href="#semantic-search">语义搜索 vs 关键词</a>
+  <a href="#rebuild-index">重建向量索引</a>
+
   <div class="nav-section">附录</div>
   <a href="#categories">知识分类说明</a>
   <a href="#template">知识模板参考</a>
@@ -286,9 +290,9 @@
 
 <!-- ====== HERO ====== -->
 <div class="hero">
-  <div class="badge">v0.1.0 · LLM-Driven</div>
+  <div class="badge">v0.2.0 · 语义搜索 · LLM-Driven</div>
   <h1>DevOps &amp; Infra 知识库</h1>
-  <p>一份知识，两种使用方式 — Web 浏览器阅读，LLM Skill 驱动。覆盖 Infra 日常操作、违规修复、自动化与 Harbor 平台。</p>
+  <p>一份知识，两种使用方式 — Web 浏览器阅读，LLM Skill 驱动。搜索不再靠关键词：搜"网站挂了"直接找到"Nginx 故障恢复流程"。</p>
 </div>
 
 <!-- ====== OVERVIEW ====== -->
@@ -297,6 +301,11 @@
 <p>本知识库基于 <strong>llm-wiki</strong> 框架设计，核心思路是：<strong>LLM 负责写入和维护知识，人类通过 Web 阅读知识，Skill 作为连接 LLM 与知识库的桥梁。</strong></p>
 
 <div class="card-grid">
+  <div class="card">
+    <span class="icon">🔮</span>
+    <h4>语义搜索</h4>
+    <p>搜"网站挂了"直接找到"Nginx 故障恢复流程"——不需要相同关键词，AI 理解你的意思。</p>
+  </div>
   <div class="card">
     <span class="icon">🌐</span>
     <h4>Web 界面</h4>
@@ -562,9 +571,9 @@ OpenCode 会调用 python kb.py ingest 完成入库。</pre>
 <ol class="step-list">
   <li><strong>提供原始内容</strong> — 粘贴文本或指定 raw/ 目录下的文件路径</li>
   <li><strong>LLM 整理</strong> — 自动提取背景、步骤、验证、回滚，补充缺失信息</li>
-  <li><strong>去重检测</strong> — LLM 语义对比，判断是新知识还是版本更新</li>
-  <li><strong>质量检查</strong> — 三级质检，不通过会告诉你具体缺什么</li>
-  <li><strong>入库完成</strong> — 生成 .md + .html + Skill 文件，更新索引和日志</li>
+  <li><strong>LLM 写入临时文件</strong> — 将整理好的 Frontmatter + Markdown 保存为临时文件</li>
+  <li><strong>调用 CLI 入库</strong> — <code>python kb.py ingest raw/doc.md --content /tmp/llm-output.md</code></li>
+  <li><strong>完整 Pipeline 执行</strong> — 去重 → 质检 → 写入 wiki → 更新索引 → 生成 Skill → <strong>建立向量索引</strong></li>
 </ol>
 
 <!-- ====== LLM: SEARCH ====== -->
@@ -654,6 +663,63 @@ Skills 目录: skills/</pre>
 <h3>在 OpenCode 中加载 Skill</h3>
 <pre># 在 OpenCode 设置中指定 Skill 路径：
 Skills path: E:/Program Files/Claude/knowledge/skills</pre>
+
+<!-- ====== SEMANTIC SEARCH ====== -->
+<h2 id="semantic-search">语义搜索 vs 关键词搜索</h2>
+
+<p>知识库现在使用 <strong>sqlite-vec</strong> 向量数据库，入库时自动为每条知识生成 AI 语义向量。搜索时不再需要匹配相同关键词。</p>
+
+<h3>对比体验</h3>
+
+<table>
+  <thead><tr><th>你搜什么</th><th>关键词搜索（回退）</th><th>语义搜索（默认）</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>"网站挂了怎么办"</td>
+      <td>❌ 找不到 — 知识里没有"挂"字</td>
+      <td>✅ 找到"Nginx 故障恢复流程" (0.47)</td>
+    </tr>
+    <tr>
+      <td>"CI/CD 怎么配"</td>
+      <td>❌ 找不到 — 知识里写的是"Jenkins 部署"</td>
+      <td>✅ 找到"Jenkins 部署流程" (0.76)</td>
+    </tr>
+    <tr>
+      <td>"nginx 502 error"</td>
+      <td>⚠️ 低分 — "502"不在摘要里</td>
+      <td>✅ 跨语言匹配 (0.70)</td>
+    </tr>
+    <tr>
+      <td>"磁盘满了"</td>
+      <td>⚠️ 低分 — 知识写的是"磁盘使用率超过 80%"</td>
+      <td>✅ 找到"磁盘空间清理"</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note success">
+  <strong>💡 双模工作：</strong> 优先使用语义搜索。如果向量数据库未初始化，自动回退到关键词匹配。两者体验无缝。
+</div>
+
+<!-- ====== REBUILD INDEX ====== -->
+<h2 id="rebuild-index">重建向量索引</h2>
+
+<p>如果向量数据库丢失或损坏，可以从 <code>wiki/*.md</code> 文件重建：</p>
+
+<pre># 重建全量向量索引
+python kb.py rebuild-index
+
+# 输出示例:
+# 正在重建向量索引...
+# ✓ 索引完成: 42 条知识
+#   infra-daily: 12 条
+#   infra-violation: 8 条
+#   automation: 15 条
+#   harbor: 7 条</pre>
+
+<div class="note warn">
+  <strong>💡 何时使用：</strong> 首次部署后、向量数据库文件丢失、或升级 embedding 模型后需要重新索引所有知识。
+</div>
 
 <!-- ====== CATEGORIES ====== -->
 <h2 id="categories">知识分类说明</h2>
