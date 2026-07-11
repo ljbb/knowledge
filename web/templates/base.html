@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DevOps & Infra 知识库{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true, theme: 'default'});</script>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="/" class="brand">📚 DevOps & Infra 知识库</a>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/admin/">管理</a>
+            <a href="/admin/health">健康检查</a>
+        </div>
+        <div class="nav-search">
+            <form onsubmit="event.preventDefault(); window.location.href='/api/search?q='+encodeURIComponent(this.q.value);">
+                <input type="text" name="q" placeholder="搜索知识...">
+                <button type="submit">搜索</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <footer>
+        <p>DevOps & Infra 知识库 — LLM 驱动，Skill 赋能</p>
+    </footer>
+</body>
+</html>

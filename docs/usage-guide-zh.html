@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps &amp; Infra 知识库 — 使用指南</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --primary: #3b82f6;
+    --primary-light: #eff6ff;
+    --accent: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --code-bg: #1e293b;
+    --code-text: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-light: #1e3a5f;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,.3);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,.4);
+    }
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    display: flex;
+  }
+
+  /* Sidebar */
+  nav.sidebar {
+    position: sticky; top:0; left:0;
+    width: 260px; height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  nav.sidebar .logo {
+    font-size: 1.15rem; font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 2rem;
+    display: block; text-decoration: none;
+  }
+
+  nav.sidebar .logo span { color: var(--accent); }
+
+  nav.sidebar .nav-section {
+    font-size: .7rem; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--text-secondary);
+    margin: 1.5rem 0 .5rem; font-weight: 700;
+  }
+
+  nav.sidebar a {
+    display: block; padding: .45rem .75rem;
+    color: var(--text-secondary); text-decoration: none;
+    border-radius: 6px; font-size: .9rem;
+    transition: all .15s;
+  }
+
+  nav.sidebar a:hover,
+  nav.sidebar a.active {
+    color: var(--primary); background: var(--primary-light);
+  }
+
+  /* Main */
+  main {
+    flex:1; max-width: 900px;
+    padding: 2.5rem 3rem 5rem;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff; border-radius: var(--radius);
+    padding: 2.5rem 2.5rem 2rem; margin-bottom: 2.5rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ''; position: absolute;
+    top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: rgba(255,255,255,.06);
+    border-radius: 50%;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: .5rem; position:relative; z-index:1; }
+  .hero p { font-size: 1.05rem; opacity: .9; max-width: 550px; position:relative; z-index:1; }
+  .hero .badge {
+    display: inline-block; padding: .25rem .75rem;
+    background: rgba(255,255,255,.18);
+    border-radius: 20px; font-size: .8rem; margin-bottom: 1rem;
+    position:relative; z-index:1;
+  }
+
+  /* Content */
+  h2 {
+    font-size: 1.55rem; font-weight: 700;
+    margin: 2.5rem 0 1rem; padding-top: .5rem;
+    border-bottom: 2px solid var(--border); padding-bottom: .5rem;
+  }
+
+  h3 { font-size: 1.2rem; font-weight: 600; margin: 1.8rem 0 .6rem; }
+
+  p { margin-bottom: 1rem; color: var(--text-secondary); }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(240px,1fr));
+    gap: 1rem; margin: 1.5rem 0;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: transform .15s,box-shadow .15s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .card h4 { font-size: 1rem; margin-bottom: .4rem; }
+  .card .icon { font-size: 1.6rem; margin-bottom: .5rem; display:block; }
+  .card p { font-size: .88rem; margin:0; }
+
+  .card.route {
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+  .card.route .method {
+    display: inline-block; padding: .15rem .5rem;
+    border-radius: 4px; font-size: .7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .method.get { background: #dbeafe; color: #2563eb; }
+  .method.post { background: #d1fae5; color: #059669; }
+
+  /* Table */
+  table {
+    width: 100%; border-collapse: collapse;
+    margin: 1.5rem 0; font-size: .92rem;
+    background: var(--surface); border-radius: var(--radius-sm);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  th {
+    background: var(--primary-light); color: var(--primary);
+    font-weight: 600; text-align: left;
+    padding: .75rem 1rem; font-size: .8rem;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  td { padding: .75rem 1rem; border-top: 1px solid var(--border); }
+  tr:hover td { background: var(--bg); }
+
+  /* Code */
+  pre {
+    background: var(--code-bg); color: var(--code-text);
+    border-radius: var(--radius-sm); padding: 1.2rem 1.5rem;
+    overflow-x: auto; font-size: .88rem; line-height: 1.6;
+    margin: 1rem 0;
+  }
+
+  code {
+    font-family: "Cascadia Code","Fira Code","JetBrains Mono",Consolas,monospace;
+    font-size: .88em;
+  }
+
+  :not(pre) > code {
+    background: var(--primary-light); color: var(--primary);
+    padding: .15em .4em; border-radius: 4px;
+  }
+
+  /* Step cards */
+  .step-list { counter-reset: step; list-style: none; padding:0; margin:1.5rem 0; }
+  .step-list li {
+    counter-increment: step;
+    padding: 1.25rem 1.25rem 1.25rem 4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: .75rem;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+  .step-list li::before {
+    content: counter(step);
+    position: absolute; left: 1rem; top: 1.15rem;
+    width: 2rem; height: 2rem;
+    background: var(--primary);
+    color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .9rem;
+  }
+
+  /* Switch tabs */
+  .tab-bar {
+    display: flex; gap: 0; margin: 1.5rem 0 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab-bar button {
+    padding: .6rem 1.5rem; border: none; background: none;
+    font-size: .9rem; cursor: pointer;
+    color: var(--text-secondary); font-weight: 500;
+    border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .tab-bar button.active {
+    color: var(--primary); border-bottom-color: var(--primary);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Info box */
+  .note {
+    background: var(--primary-light); border-left: 4px solid var(--primary);
+    padding: 1rem 1.25rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1.5rem 0; font-size: .92rem;
+  }
+  .note.warn { background: #fef3c7; border-left-color: var(--warning); }
+  .note.success { background: #d1fae5; border-left-color: var(--success); }
+
+  @media (max-width: 900px) {
+    nav.sidebar { display: none; }
+    main { padding: 1.5rem; }
+    .hero { padding: 1.5rem; }
+    .hero h1 { font-size: 1.5rem; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <a href="#" class="logo">📚 DevOps <span>KB</span></a>
+
+  <div class="nav-section">概述</div>
+  <a href="#overview" class="active">知识库简介</a>
+  <a href="#quickstart">快速开始</a>
+
+  <div class="nav-section">Web 界面</div>
+  <a href="#web-overview">页面总览</a>
+  <a href="#page-home">首页 — 分类浏览</a>
+  <a href="#page-category">分类页 — 条目列表</a>
+  <a href="#page-knowledge">知识页 — 阅读详情</a>
+  <a href="#page-admin">管理页 — 上传文件</a>
+  <a href="#page-health">健康页 — 质量报告</a>
+
+  <div class="nav-section">LLM 使用</div>
+  <a href="#llm-overview">工作方式</a>
+  <a href="#llm-ingest">上传知识 (kb-ingest)</a>
+  <a href="#llm-search">搜索知识 (kb-search)</a>
+  <a href="#llm-check">检查状态 (kb-status)</a>
+  <a href="#llm-setup">配置 LLM 环境</a>
+
+  <div class="nav-section">附录</div>
+  <a href="#categories">知识分类说明</a>
+  <a href="#template">知识模板参考</a>
+  <a href="#troubleshoot">常见问题</a>
+</nav>
+
+<main>
+
+<!-- ====== HERO ====== -->
+<div class="hero">
+  <div class="badge">v0.1.0 · LLM-Driven</div>
+  <h1>DevOps &amp; Infra 知识库</h1>
+  <p>一份知识，两种使用方式 — Web 浏览器阅读，LLM Skill 驱动。覆盖 Infra 日常操作、违规修复、自动化与 Harbor 平台。</p>
+</div>
+
+<!-- ====== OVERVIEW ====== -->
+<h2 id="overview">知识库简介</h2>
+
+<p>本知识库基于 <strong>llm-wiki</strong> 框架设计，核心思路是：<strong>LLM 负责写入和维护知识，人类通过 Web 阅读知识，Skill 作为连接 LLM 与知识库的桥梁。</strong></p>
+
+<div class="card-grid">
+  <div class="card">
+    <span class="icon">🌐</span>
+    <h4>Web 界面</h4>
+    <p>浏览器中浏览、搜索、上传原始文件，查看含流程图的完整知识内容。</p>
+  </div>
+  <div class="card">
+    <span class="icon">🤖</span>
+    <h4>LLM Skill</h4>
+    <p>在 Claude Code / OpenCode / Copilot 中通过 Skill 导入知识、搜索知识、检查健康状态。</p>
+  </div>
+  <div class="card">
+    <span class="icon">📄</span>
+    <h4>Markdown 本体</h4>
+    <p>知识以 Markdown 文件存储，人和 LLM 都能直接阅读，Git 版本管理。</p>
+  </div>
+  <div class="card">
+    <span class="icon">✅</span>
+    <h4>三级质检</h4>
+    <p>A 级基础 · B 级内容 · C 级全面，确保每条知识可靠、可执行、可追溯。</p>
+  </div>
+</div>
+
+<!-- ====== QUICK START ====== -->
+<h2 id="quickstart">快速开始</h2>
+
+<ol class="step-list">
+  <li>
+    <strong>初始化</strong><br>
+    <code>python kb.py init</code>
+  </li>
+  <li>
+    <strong>配置 LLM API Key</strong>（至少一个）<br>
+    <code>ANTHROPIC_API_KEY=sk-ant-...</code> 或 <code>DEEPSEEK_API_KEY=sk-...</code> 或 <code>GEMINI_API_KEY=...</code>
+  </li>
+  <li>
+    <strong>启动 Web 服务</strong><br>
+    <code>python kb.py serve</code> → 访问 <code>http://localhost:8000</code>
+  </li>
+  <li>
+    <strong>在 LLM 中加载 Skill 目录</strong><br>
+    将 <code>skills/</code> 目录配置为 Claude Code / OpenCode / Copilot 的 Skill 来源。
+  </li>
+</ol>
+
+<!-- ====== WEB OVERVIEW ====== -->
+<h2 id="web-overview">Web 界面 — 页面总览</h2>
+
+<p>Web 界面有两大类功能区域：<strong>阅读区</strong>（面向所有用户）和 <strong>管理区</strong>（面向知识维护者）。</p>
+
+<table>
+  <thead>
+    <tr><th>页面</th><th>URL</th><th>用途</th><th>使用场景</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>首页</strong></td>
+      <td><code>/</code></td>
+      <td>四分类卡片入口</td>
+      <td>刚打开知识库，想浏览有哪些分类</td>
+    </tr>
+    <tr>
+      <td><strong>分类页</strong></td>
+      <td><code>/kb/infra-daily</code></td>
+      <td>展示某分类下所有知识条目</td>
+      <td>想查看某个领域（如日常操作）的所有知识</td>
+    </tr>
+    <tr>
+      <td><strong>知识页</strong></td>
+      <td><code>/kb/infra-daily/kb-2026-0711-001</code></td>
+      <td>阅读单条知识的完整内容 + 流程图</td>
+      <td>需要执行某个具体操作，查看步骤和验证方法</td>
+    </tr>
+    <tr>
+      <td><strong>管理首页</strong></td>
+      <td><code>/admin/</code></td>
+      <td>查看 raw/ 文件列表</td>
+      <td>想看看有哪些原始文件待导入</td>
+    </tr>
+    <tr>
+      <td><strong>上传页</strong></td>
+      <td><code>/admin/upload</code></td>
+      <td>拖拽上传原始文件</td>
+      <td>有一份操作文档想加入知识库</td>
+    </tr>
+    <tr>
+      <td><strong>健康页</strong></td>
+      <td><code>/admin/health</code></td>
+      <td>三级质量检查报告</td>
+      <td>定期检查知识库质量，发现孤立/过时/缺字段的知识</td>
+    </tr>
+    <tr>
+      <td><strong>API 文档</strong></td>
+      <td><code>/docs</code></td>
+      <td>OpenAPI 自动生成的 Swagger</td>
+      <td>开发者调试 API</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ====== PAGE: HOME ====== -->
+<h2 id="page-home">首页 — 分类浏览</h2>
+
+<p>打开 <code>http://localhost:8000/</code>，你会看到四个分类卡片：</p>
+
+<div class="card-grid">
+  <div class="card"><span class="icon">🔧</span><h4>infra-daily</h4><p>Infra 日常操作：重启、部署、监控、巡检</p></div>
+  <div class="card"><span class="icon">🛡️</span><h4>infra-violation</h4><p>Infra 违规修复：安全漏洞、配置违规、性能问题</p></div>
+  <div class="card"><span class="icon">⚡</span><h4>automation</h4><p>自动化：CI/CD、脚本、定时任务、告警规则</p></div>
+  <div class="card"><span class="icon">🏗️</span><h4>harbor</h4><p>Harbor 平台：任务管理、执行接口、平台操作</p></div>
+</div>
+
+<div class="note success">
+  <strong>💡 使用时机：</strong> 首次打开知识库，或者想浏览某个领域有什么知识时。
+</div>
+
+<!-- ====== PAGE: KNOWLEDGE ====== -->
+<h2 id="page-knowledge">知识页 — 阅读详情</h2>
+
+<p>知识详情页从上到下展示：</p>
+<ol class="step-list">
+  <li><strong>元信息区</strong> — ID、分类、版本、状态、作者、更新日期</li>
+  <li><strong>背景/场景</strong> — 什么情况下使用这条知识</li>
+  <li><strong>操作步骤</strong> — 带命令行的分步指引</li>
+  <li><strong>流程图</strong>（如果有） — Mermaid 流程可视化</li>
+  <li><strong>验证证据</strong> — 检查清单</li>
+  <li><strong>回滚方案</strong> — 出问题了怎么恢复</li>
+  <li><strong>执行接口</strong> — Harbor CLI、Jenkins、GitHub Action 链接</li>
+</ol>
+
+<div class="note success">
+  <strong>💡 使用时机：</strong> 需要执行某个具体操作时。打开对应知识页，按步骤操作，逐项打勾验证。
+</div>
+
+<!-- ====== PAGE: ADMIN ====== -->
+<h2 id="page-admin">管理页 — 上传原始文件</h2>
+
+<p>管理后台 <code>/admin/</code> 有两个子页面：</p>
+
+<table>
+  <thead><tr><th>页面</th><th>功能</th><th>使用时机</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>/admin/</code></td>
+      <td>查看已上传到 <code>raw/</code> 的原始文件列表</td>
+      <td>想看看有哪些文件等待导入</td>
+    </tr>
+    <tr>
+      <td><code>/admin/upload</code></td>
+      <td>拖拽上传文件（.md / .txt / .pdf / .docx）</td>
+      <td>你有一份操作文档、Wiki 文章、会议记录想加入知识库</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>⚠️ 注意：</strong> 上传到 raw/ 只是第一步。上传后需要 <strong>在 LLM 中通过 kb-ingest Skill</strong> 完成内容的整理和导入。上传 ≠ 入库。
+</div>
+
+<!-- ====== PAGE: HEALTH ====== -->
+<h2 id="page-health">健康页 — 质量报告</h2>
+
+<p>访问 <code>/admin/health</code> 查看自动化质量检查报告：</p>
+
+<table>
+  <thead><tr><th>检查级别</th><th>检查内容</th><th>不通过后果</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>A 级 · 基础</strong></td>
+      <td>必填字段、ID 格式、死链接、Markdown 语法</td>
+      <td>阻止入库</td>
+    </tr>
+    <tr>
+      <td><strong>B 级 · 内容</strong></td>
+      <td>步骤可执行性、验证证据、回滚方案</td>
+      <td>阻止入库</td>
+    </tr>
+    <tr>
+      <td><strong>C 级 · 全面</strong></td>
+      <td>知识新鲜度、交叉引用、孤立检测</td>
+      <td>阻止入库</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note warn">
+  <strong>💡 使用时机：</strong> 定期（建议每周）打开检查。发现的问题附带修复指引，逐条处理即可。
+</div>
+
+<!-- ====== LLM OVERVIEW ====== -->
+<h2 id="llm-overview">LLM 使用 — 工作方式</h2>
+
+<p>知识库为 LLM 提供了 <strong>3 个元 Skill</strong>，它们遵循 <strong>agentskill.io</strong> 标准，可在 Claude Code、OpenCode、GitHub Copilot 中加载。LLM 通过 Skill → CLI → Engine 的路径操作知识库。</p>
+
+<pre>┌──────────┐     ┌──────────────┐     ┌──────────┐
+│  用户     │────▶│  LLM + Skill │────▶│  Engine  │
+│ "导入这篇"│     │ kb-ingest    │     │ ingest() │
+└──────────┘     └──────────────┘     └──────────┘
+                                             │
+                              ┌──────────────┼──────────────┐
+                              ▼              ▼              ▼
+                         wiki/*.md     index.md       log.md
+                         + .html       (更新)         (追加)</pre>
+
+<div class="card-grid">
+  <div class="card">
+    <span class="icon">📥</span>
+    <h4>kb-ingest</h4>
+    <p>导入知识：接收文本或文件 → LLM 整理格式 → 去重 → 质检 → 入库 → 生成 Skill</p>
+  </div>
+  <div class="card">
+    <span class="icon">🔍</span>
+    <h4>kb-search</h4>
+    <p>搜索知识：LLM 提取关键词 → Engine 执行搜索 → 返回匹配的知识 Skill</p>
+  </div>
+  <div class="card">
+    <span class="icon">📊</span>
+    <h4>kb-status</h4>
+    <p>健康检查：运行三级质检 → 汇总问题 → 给出修复建议</p>
+  </div>
+</div>
+
+<!-- ====== LLM: INGEST ====== -->
+<h2 id="llm-ingest">上传知识 — 使用 kb-ingest</h2>
+
+<p>这是将新知识加入知识库的唯一入口。无论通过哪种 LLM 平台，流程一致：</p>
+
+<div class="tab-bar">
+  <button class="active" onclick="switchTab(event,'ingest-copilot')">GitHub Copilot</button>
+  <button onclick="switchTab(event,'ingest-claude')">Claude Code</button>
+  <button onclick="switchTab(event,'ingest-opencode')">OpenCode</button>
+</div>
+
+<div id="ingest-copilot" class="tab-content active" style="margin-top:1.5rem;">
+<pre># 在 Copilot Chat 中直接说：
+使用 kb-ingest 导入这份文档
+
+[粘贴文档内容或拖入文件]
+
+# 或者指定文件路径：
+用 kb-ingest 把 raw/nginx-restart-guide.md 导入知识库</pre>
+</div>
+
+<div id="ingest-claude" class="tab-content" style="margin-top:1.5rem;">
+<pre># 在 Claude Code 中：
+> /kb-ingest
+
+Claude 会引导你：
+1. 提供知识内容（粘贴文本或指定文件路径）
+2. LLM 自动按模板整理
+3. LLM 检查完整性，缺失项会提示你补充
+4. 确认后自动入库</pre>
+</div>
+
+<div id="ingest-opencode" class="tab-content" style="margin-top:1.5rem;">
+<pre># 在 OpenCode 中：
+请使用 kb-ingest skill 把下面的内容导入知识库：
+
+[粘贴内容]
+
+OpenCode 会调用 python kb.py ingest 完成入库。</pre>
+</div>
+
+<ol class="step-list">
+  <li><strong>提供原始内容</strong> — 粘贴文本或指定 raw/ 目录下的文件路径</li>
+  <li><strong>LLM 整理</strong> — 自动提取背景、步骤、验证、回滚，补充缺失信息</li>
+  <li><strong>去重检测</strong> — LLM 语义对比，判断是新知识还是版本更新</li>
+  <li><strong>质量检查</strong> — 三级质检，不通过会告诉你具体缺什么</li>
+  <li><strong>入库完成</strong> — 生成 .md + .html + Skill 文件，更新索引和日志</li>
+</ol>
+
+<!-- ====== LLM: SEARCH ====== -->
+<h2 id="llm-search">阅读知识 — 使用 kb-search</h2>
+
+<p>搜索是 LLM 阅读知识库的入口。LLM 不需要遍历文件，而是通过 Engine 高效检索。</p>
+
+<div class="tab-bar">
+  <button class="active" onclick="switchTab(event,'search-copilot')">GitHub Copilot</button>
+  <button onclick="switchTab(event,'search-claude')">Claude Code</button>
+  <button onclick="switchTab(event,'search-opencode')">OpenCode</button>
+</div>
+
+<div id="search-copilot" class="tab-content active" style="margin-top:1.5rem;">
+<pre># 在 Copilot Chat 中：
+kb-search nginx 怎么安全重启
+
+# Copilot 会：
+# 1. 调用 python kb.py search "nginx 重启" --category infra-daily
+# 2. 返回匹配的知识条目列表
+# 3. 加载最匹配的知识 Skill
+# 4. 展示完整操作步骤</pre>
+</div>
+
+<div id="search-claude" class="tab-content" style="margin-top:1.5rem;">
+<pre># 在 Claude Code 中：
+> /kb-search nginx 重启流程
+
+Claude 会搜索知识库并给出操作指引。</pre>
+</div>
+
+<div id="search-opencode" class="tab-content" style="margin-top:1.5rem;">
+<pre># 在 OpenCode 中：
+用 kb-search 查找磁盘清理的操作步骤</pre>
+</div>
+
+<div class="note success">
+  <strong>Token 节省设计：</strong> 搜索时只返回标题 + 摘要（~50 tokens/条）。确认需要的条目后，才加载完整 Skill（~500 tokens）。避免 200 条知识全部读入上下文。
+</div>
+
+<!-- ====== LLM: CHECK ====== -->
+<h2 id="llm-check">检查状态 — 使用 kb-status</h2>
+
+<p>定期让 LLM 检查知识库健康状态，发现并修复问题：</p>
+
+<pre># 任何 LLM 平台都一样：
+kb-status
+
+# LLM 会运行 python kb.py check
+# 返回三级检查报告：
+# A 级（基础）: 缺字段、死链接、语法错误
+# B 级（内容）: 步骤不可执行、缺回滚
+# C 级（全面）: 知识过期、孤立知识
+#
+# 对每个问题给出具体的修复建议</pre>
+
+<div class="note warn">
+  <strong>💡 建议：</strong> 每周运行一次 <code>kb-status</code>，保持知识库健康。
+</div>
+
+<!-- ====== LLM: SETUP ====== -->
+<h2 id="llm-setup">配置 LLM 环境</h2>
+
+<p>知识库支持三种 LLM provider，至少配置一个：</p>
+
+<table>
+  <thead><tr><th>Provider</th><th>环境变量</th><th>默认模型</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Claude</strong></td><td><code>ANTHROPIC_API_KEY</code></td><td>claude-sonnet-4-6</td></tr>
+    <tr><td><strong>DeepSeek</strong></td><td><code>DEEPSEEK_API_KEY</code></td><td>deepseek-chat</td></tr>
+    <tr><td><strong>Gemini</strong></td><td><code>GEMINI_API_KEY</code></td><td>gemini-2.5-pro</td></tr>
+  </tbody>
+</table>
+
+<h3>在 Claude Code 中加载 Skill</h3>
+<pre># .claude/settings.json 中添加：
+{
+  "skills": {
+    "paths": ["E:/Program Files/Claude/knowledge/skills"]
+  }
+}</pre>
+
+<h3>在 GitHub Copilot 中加载 Skill</h3>
+<pre># .github/copilot-instructions.md 中添加：
+Skills 目录: skills/</pre>
+
+<h3>在 OpenCode 中加载 Skill</h3>
+<pre># 在 OpenCode 设置中指定 Skill 路径：
+Skills path: E:/Program Files/Claude/knowledge/skills</pre>
+
+<!-- ====== CATEGORIES ====== -->
+<h2 id="categories">知识分类说明</h2>
+
+<table>
+  <thead><tr><th>分类 ID</th><th>名称</th><th>内容范围</th><th>示例</th></tr></thead>
+  <tbody>
+    <tr><td><code>infra-daily</code></td><td>Infra 日常操作</td><td>重启、部署、监控、巡检、扩容、备份</td><td>"重启生产 Nginx"、"磁盘清理"</td></tr>
+    <tr><td><code>infra-violation</code></td><td>Infra 违规修复</td><td>安全漏洞、配置不合规、性能瓶颈</td><td>"修复 OpenSSL 漏洞"、"解除端口冲突"</td></tr>
+    <tr><td><code>automation</code></td><td>自动化</td><td>CI/CD Pipeline、定时脚本、告警规则</td><td>"Jenkins 部署流水线"、"自动扩容脚本"</td></tr>
+    <tr><td><code>harbor</code></td><td>Harbor 平台</td><td>内部自动化平台的任务和接口</td><td>"Harbor Job 触发方式"、"CLI 命令参考"</td></tr>
+  </tbody>
+</table>
+
+<!-- ====== TEMPLATE ====== -->
+<h2 id="template">知识模板参考</h2>
+
+<p>每条知识入库后包含以下字段和段落：</p>
+
+<pre>---
+id: kb-2026-0711-001
+title: "知识标题"
+category: infra-daily
+tags: [关键词1, 关键词2]
+author: "作者"
+created: 2026-07-11
+updated: 2026-07-11
+version: 1
+status: verified
+source_file: raw/source.md
+source_hash: sha256:abc123...
+diagram: |
+  flowchart TD
+    A[步骤1] --> B[步骤2]
+---
+
+# 知识标题
+
+## 背景/场景
+> 什么情况下使用
+
+## 前置条件
+## 操作步骤
+## 验证证据
+## 回滚方案
+## 关联知识
+## 执行接口</pre>
+
+<!-- ====== TROUBLESHOOT ====== -->
+<h2 id="troubleshoot">常见问题</h2>
+
+<div class="note warn">
+  <strong>Q: 上传文件后 Web 上看不到新知识？</strong><br>
+  A: 上传到 raw/ 只是存放原始文件。需要在 LLM 中使用 <code>kb-ingest</code> 完成导入，知识才会出现在 wiki/ 中。
+</div>
+
+<div class="note warn">
+  <strong>Q: kb-search 返回空结果？</strong><br>
+  A: 检查 wiki/ 目录是否有 .md 文件。如果是空知识库，先用 <code>kb-ingest</code> 导入几条知识。
+</div>
+
+<div class="note warn">
+  <strong>Q: LLM 说"SKILL 不可用"？</strong><br>
+  A: 确认 skills/ 目录已正确加载到 LLM 平台的 Skill 路径配置中。
+</div>
+
+<div class="note warn">
+  <strong>Q: 知识页不显示流程图？</strong><br>
+  A: 流程图在导入时由 LLM 自动生成。如果导入时 LLM 不可用，则不会生成流程图。可以重新用 LLM 导入来补充。
+</div>
+
+<div class="note warn">
+  <strong>Q: 如何更新已有知识？</strong><br>
+  A: 上传新版本的原始文件 → 用 <code>kb-ingest</code> 重新导入。Engine 会自动检测重复，生成 version+1 的新版本。
+</div>
+
+<footer style="margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);text-align:center;color:var(--text-secondary);font-size:.85rem;">
+  <p>DevOps &amp; Infra 知识库 · LLM-Driven · Skill-Powered · 2026</p>
+</footer>
+
+</main>
+
+<script>
+function switchTab(event, tabId) {
+  const bar = event.target.closest('.tab-bar');
+  bar.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const container = bar.parentElement;
+  container.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+// Active nav link highlight on scroll
+const sections = document.querySelectorAll('h2[id]');
+const navLinks = document.querySelectorAll('nav.sidebar a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+
+</body>
+</html>

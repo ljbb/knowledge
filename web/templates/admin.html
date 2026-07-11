@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}管理后台{% endblock %}
+{% block content %}
+<h1>管理后台</h1>
+
+{% if section == "upload" %}
+    <h2>上传原始文件</h2>
+    <form action="/admin/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".md,.txt,.pdf,.docx">
+        <button type="submit">上传</button>
+    </form>
+    <p>上传后，使用 kb-ingest Skill 在 LLM 环境中处理导入。</p>
+{% elif section == "index" %}
+    <h2>原始文件列表</h2>
+    {% if raw_files %}
+    <ul>
+    {% for f in raw_files %}
+        <li>{{ f.name }} ({{ f.size }} bytes)</li>
+    {% endfor %}
+    </ul>
+    {% else %}
+    <p>暂无原始文件。<a href="/admin/upload">上传文件</a></p>
+    {% endif %}
+{% endif %}
+{% endblock %}

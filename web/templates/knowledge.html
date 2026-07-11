@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{{ kb_id }}{% endblock %}
+{% block content %}
+<div class="knowledge-view">
+    {{ content | safe }}
+</div>
+<p><a href="/">← 返回首页</a></p>
+{% endblock %}

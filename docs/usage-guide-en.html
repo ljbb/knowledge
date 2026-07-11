@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps &amp; Infra Knowledge Base — User Guide</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --primary: #3b82f6;
+    --primary-light: #eff6ff;
+    --accent: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --code-bg: #1e293b;
+    --code-text: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-light: #1e3a5f;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,.3);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,.4);
+    }
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    display: flex;
+  }
+
+  nav.sidebar {
+    position: sticky; top:0; left:0;
+    width: 260px; height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  nav.sidebar .logo {
+    font-size: 1.15rem; font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 2rem;
+    display: block; text-decoration: none;
+  }
+
+  nav.sidebar .logo span { color: var(--accent); }
+
+  nav.sidebar .nav-section {
+    font-size: .7rem; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--text-secondary);
+    margin: 1.5rem 0 .5rem; font-weight: 700;
+  }
+
+  nav.sidebar a {
+    display: block; padding: .45rem .75rem;
+    color: var(--text-secondary); text-decoration: none;
+    border-radius: 6px; font-size: .9rem;
+    transition: all .15s;
+  }
+
+  nav.sidebar a:hover,
+  nav.sidebar a.active {
+    color: var(--primary); background: var(--primary-light);
+  }
+
+  main {
+    flex:1; max-width: 900px;
+    padding: 2.5rem 3rem 5rem;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff; border-radius: var(--radius);
+    padding: 2.5rem 2.5rem 2rem; margin-bottom: 2.5rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ''; position: absolute;
+    top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: rgba(255,255,255,.06);
+    border-radius: 50%;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: .5rem; position:relative; z-index:1; }
+  .hero p { font-size: 1.05rem; opacity: .9; max-width: 550px; position:relative; z-index:1; }
+  .hero .badge {
+    display: inline-block; padding: .25rem .75rem;
+    background: rgba(255,255,255,.18);
+    border-radius: 20px; font-size: .8rem; margin-bottom: 1rem;
+    position:relative; z-index:1;
+  }
+
+  h2 {
+    font-size: 1.55rem; font-weight: 700;
+    margin: 2.5rem 0 1rem; padding-top: .5rem;
+    border-bottom: 2px solid var(--border); padding-bottom: .5rem;
+  }
+
+  h3 { font-size: 1.2rem; font-weight: 600; margin: 1.8rem 0 .6rem; }
+
+  p { margin-bottom: 1rem; color: var(--text-secondary); }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(240px,1fr));
+    gap: 1rem; margin: 1.5rem 0;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: transform .15s,box-shadow .15s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .card h4 { font-size: 1rem; margin-bottom: .4rem; }
+  .card .icon { font-size: 1.6rem; margin-bottom: .5rem; display:block; }
+  .card p { font-size: .88rem; margin:0; }
+
+  table {
+    width: 100%; border-collapse: collapse;
+    margin: 1.5rem 0; font-size: .92rem;
+    background: var(--surface); border-radius: var(--radius-sm);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  th {
+    background: var(--primary-light); color: var(--primary);
+    font-weight: 600; text-align: left;
+    padding: .75rem 1rem; font-size: .8rem;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  td { padding: .75rem 1rem; border-top: 1px solid var(--border); }
+  tr:hover td { background: var(--bg); }
+
+  pre {
+    background: var(--code-bg); color: var(--code-text);
+    border-radius: var(--radius-sm); padding: 1.2rem 1.5rem;
+    overflow-x: auto; font-size: .88rem; line-height: 1.6;
+    margin: 1rem 0;
+  }
+
+  code {
+    font-family: "Cascadia Code","Fira Code","JetBrains Mono",Consolas,monospace;
+    font-size: .88em;
+  }
+
+  :not(pre) > code {
+    background: var(--primary-light); color: var(--primary);
+    padding: .15em .4em; border-radius: 4px;
+  }
+
+  .step-list { counter-reset: step; list-style: none; padding:0; margin:1.5rem 0; }
+  .step-list li {
+    counter-increment: step;
+    padding: 1.25rem 1.25rem 1.25rem 4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: .75rem;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+  .step-list li::before {
+    content: counter(step);
+    position: absolute; left: 1rem; top: 1.15rem;
+    width: 2rem; height: 2rem;
+    background: var(--primary);
+    color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .9rem;
+  }
+
+  .tab-bar {
+    display: flex; gap: 0; margin: 1.5rem 0 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab-bar button {
+    padding: .6rem 1.5rem; border: none; background: none;
+    font-size: .9rem; cursor: pointer;
+    color: var(--text-secondary); font-weight: 500;
+    border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .tab-bar button.active {
+    color: var(--primary); border-bottom-color: var(--primary);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .note {
+    background: var(--primary-light); border-left: 4px solid var(--primary);
+    padding: 1rem 1.25rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1.5rem 0; font-size: .92rem;
+  }
+  .note.warn { background: #fef3c7; border-left-color: var(--warning); }
+  .note.success { background: #d1fae5; border-left-color: var(--success); }
+
+  @media (max-width: 900px) {
+    nav.sidebar { display: none; }
+    main { padding: 1.5rem; }
+    .hero { padding: 1.5rem; }
+    .hero h1 { font-size: 1.5rem; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <a href="#" class="logo">📚 DevOps <span>KB</span></a>
+
+  <div class="nav-section">Overview</div>
+  <a href="#overview" class="active">Introduction</a>
+  <a href="#quickstart">Quick Start</a>
+
+  <div class="nav-section">Web Interface</div>
+  <a href="#web-overview">Page Overview</a>
+  <a href="#page-home">Home — Browse</a>
+  <a href="#page-category">Category — List</a>
+  <a href="#page-knowledge">Knowledge — Read</a>
+  <a href="#page-admin">Admin — Upload</a>
+  <a href="#page-health">Health — Report</a>
+
+  <div class="nav-section">LLM Usage</div>
+  <a href="#llm-overview">How It Works</a>
+  <a href="#llm-ingest">Ingest Knowledge</a>
+  <a href="#llm-search">Search Knowledge</a>
+  <a href="#llm-check">Health Check</a>
+  <a href="#llm-setup">Configure LLM</a>
+
+  <div class="nav-section">Appendix</div>
+  <a href="#categories">Categories</a>
+  <a href="#template">Template Reference</a>
+  <a href="#troubleshoot">Troubleshooting</a>
+</nav>
+
+<main>
+
+<!-- ====== HERO ====== -->
+<div class="hero">
+  <div class="badge">v0.1.0 · LLM-Driven</div>
+  <h1>DevOps &amp; Infra Knowledge Base</h1>
+  <p>One knowledge base, two interfaces — browse in your browser, drive with LLM Skills. Covers daily infra ops, violation fixes, automation, and Harbor platform.</p>
+</div>
+
+<!-- ====== OVERVIEW ====== -->
+<h2 id="overview">Introduction</h2>
+
+<p>Built on the <strong>llm-wiki</strong> framework, this knowledge base flips the traditional RAG model: instead of retrieving raw documents at query time, <strong>the LLM incrementally builds and maintains a persistent, structured wiki</strong> of interlinked markdown files. The knowledge is compiled once, kept current, and served to both humans and LLMs.</p>
+
+<div class="card-grid">
+  <div class="card">
+    <span class="icon">🌐</span>
+    <h4>Web Interface</h4>
+    <p>Browse, search, upload source files. View complete knowledge entries with flowcharts rendered in the browser.</p>
+  </div>
+  <div class="card">
+    <span class="icon">🤖</span>
+    <h4>LLM Skills</h4>
+    <p>Ingest, search, and health-check via agentskill.io standard Skills. Works with Claude Code, OpenCode, and GitHub Copilot.</p>
+  </div>
+  <div class="card">
+    <span class="icon">📄</span>
+    <h4>Markdown Core</h4>
+    <p>Knowledge lives as Markdown files. Both humans and LLMs can read them directly. Git-powered version history.</p>
+  </div>
+  <div class="card">
+    <span class="icon">✅</span>
+    <h4>3-Tier QA</h4>
+    <p>Level A (basics) · Level B (content) · Level C (comprehensive). Every entry is verified before ingestion.</p>
+  </div>
+</div>
+
+<!-- ====== QUICK START ====== -->
+<h2 id="quickstart">Quick Start</h2>
+
+<ol class="step-list">
+  <li>
+    <strong>Initialize</strong><br>
+    <code>python kb.py init</code>
+  </li>
+  <li>
+    <strong>Configure at least one LLM API key</strong><br>
+    <code>ANTHROPIC_API_KEY=sk-ant-...</code> or <code>DEEPSEEK_API_KEY=sk-...</code> or <code>GEMINI_API_KEY=...</code>
+  </li>
+  <li>
+    <strong>Start the web server</strong><br>
+    <code>python kb.py serve</code> → Open <code>http://localhost:8000</code>
+  </li>
+  <li>
+    <strong>Load Skills into your LLM</strong><br>
+    Point Claude Code / OpenCode / Copilot to the <code>skills/</code> directory.
+  </li>
+</ol>
+
+<!-- ====== WEB OVERVIEW ====== -->
+<h2 id="web-overview">Web Interface — Page Overview</h2>
+
+<p>The web interface has two areas: <strong>Reading</strong> (for all users) and <strong>Admin</strong> (for knowledge maintainers).</p>
+
+<table>
+  <thead>
+    <tr><th>Page</th><th>URL</th><th>Purpose</th><th>When to Use</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Home</strong></td>
+      <td><code>/</code></td>
+      <td>Four category cards with entry counts</td>
+      <td>Just opened the KB, exploring what's available</td>
+    </tr>
+    <tr>
+      <td><strong>Category</strong></td>
+      <td><code>/kb/infra-daily</code></td>
+      <td>List all entries in a category</td>
+      <td>Want to see everything in one domain (e.g. daily ops)</td>
+    </tr>
+    <tr>
+      <td><strong>Knowledge</strong></td>
+      <td><code>/kb/infra-daily/kb-2026-…</code></td>
+      <td>Full entry with flowchart</td>
+      <td>Need to follow step-by-step instructions for a task</td>
+    </tr>
+    <tr>
+      <td><strong>Admin Home</strong></td>
+      <td><code>/admin/</code></td>
+      <td>List raw source files</td>
+      <td>Check what files are waiting to be ingested</td>
+    </tr>
+    <tr>
+      <td><strong>Upload</strong></td>
+      <td><code>/admin/upload</code></td>
+      <td>Drag-and-drop file upload</td>
+      <td>Have a document, wiki article, or notes to add to the KB</td>
+    </tr>
+    <tr>
+      <td><strong>Health</strong></td>
+      <td><code>/admin/health</code></td>
+      <td>3-tier quality report</td>
+      <td>Periodic check for stale, orphan, or incomplete entries</td>
+    </tr>
+    <tr>
+      <td><strong>API Docs</strong></td>
+      <td><code>/docs</code></td>
+      <td>OpenAPI Swagger UI</td>
+      <td>Developer debugging or integration</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ====== PAGE: HOME ====== -->
+<h2 id="page-home">Home — Browse Categories</h2>
+
+<p>Open <code>http://localhost:8000/</code> to see the four category cards:</p>
+
+<div class="card-grid">
+  <div class="card"><span class="icon">🔧</span><h4>infra-daily</h4><p>Daily operations: restart, deploy, monitor, inspect</p></div>
+  <div class="card"><span class="icon">🛡️</span><h4>infra-violation</h4><p>Violation fixes: security patches, config compliance, performance</p></div>
+  <div class="card"><span class="icon">⚡</span><h4>automation</h4><p>Automation: CI/CD, scripts, cron jobs, alerting rules</p></div>
+  <div class="card"><span class="icon">🏗️</span><h4>harbor</h4><p>Harbor platform: job management, execution interfaces, platform ops</p></div>
+</div>
+
+<div class="note success">
+  <strong>💡 When to use:</strong> First visit to the knowledge base, or when browsing what knowledge exists in a domain.
+</div>
+
+<!-- ====== PAGE: KNOWLEDGE ====== -->
+<h2 id="page-knowledge">Knowledge Page — Read Details</h2>
+
+<p>Each knowledge page displays top to bottom:</p>
+<ol class="step-list">
+  <li><strong>Metadata</strong> — ID, category, version, status, author, last updated</li>
+  <li><strong>Scenario</strong> — when and why to use this knowledge</li>
+  <li><strong>Steps</strong> — numbered instructions with executable commands</li>
+  <li><strong>Flowchart</strong> (if available) — Mermaid visualization of the process</li>
+  <li><strong>Verification</strong> — checklist to confirm success</li>
+  <li><strong>Rollback</strong> — recovery steps if something goes wrong</li>
+  <li><strong>Execution Interfaces</strong> — Harbor CLI, Jenkins, GitHub Action links</li>
+</ol>
+
+<div class="note success">
+  <strong>💡 When to use:</strong> You need to perform a specific operation. Open the knowledge page, follow the steps, and check off each verification item.
+</div>
+
+<!-- ====== PAGE: ADMIN ====== -->
+<h2 id="page-admin">Admin — Upload Source Files</h2>
+
+<p>The admin area at <code>/admin/</code> has two sub-pages:</p>
+
+<table>
+  <thead><tr><th>Page</th><th>Function</th><th>When to Use</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>/admin/</code></td>
+      <td>List files already in <code>raw/</code></td>
+      <td>Check what files are queued for ingestion</td>
+    </tr>
+    <tr>
+      <td><code>/admin/upload</code></td>
+      <td>Drag-and-drop upload (.md / .txt / .pdf / .docx)</td>
+      <td>You have a document, wiki article, or meeting notes to add</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>⚠️ Important:</strong> Uploading to <code>raw/</code> is only step one. After uploading, you must <strong>use the kb-ingest Skill in an LLM</strong> to process and integrate the content. Upload &ne; Ingest.
+</div>
+
+<!-- ====== PAGE: HEALTH ====== -->
+<h2 id="page-health">Health — Quality Report</h2>
+
+<p>Visit <code>/admin/health</code> for the automated quality report:</p>
+
+<table>
+  <thead><tr><th>Level</th><th>Checks</th><th>Failure Action</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>A · Basic</strong></td>
+      <td>Required fields, ID format, dead links, Markdown syntax</td>
+      <td>Blocks ingestion</td>
+    </tr>
+    <tr>
+      <td><strong>B · Content</strong></td>
+      <td>Actionable steps, verification evidence, rollback plan</td>
+      <td>Blocks ingestion</td>
+    </tr>
+    <tr>
+      <td><strong>C · Comprehensive</strong></td>
+      <td>Freshness, cross-references, orphan detection</td>
+      <td>Blocks ingestion</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note warn">
+  <strong>💡 When to use:</strong> Run periodically (weekly recommended). Each issue comes with a specific fix suggestion.
+</div>
+
+<!-- ====== LLM OVERVIEW ====== -->
+<h2 id="llm-overview">LLM Usage — How It Works</h2>
+
+<p>The knowledge base provides <strong>3 meta Skills</strong> following the <strong>agentskill.io</strong> standard. They can be loaded into Claude Code, OpenCode, or GitHub Copilot. The LLM operates through Skills → CLI → Engine pipeline.</p>
+
+<pre>┌──────────┐     ┌──────────────┐     ┌──────────┐
+│   You     │────▶│  LLM + Skill │────▶│  Engine  │
+│ "ingest"  │     │ kb-ingest    │     │ ingest() │
+└──────────┘     └──────────────┘     └──────────┘
+                                             │
+                              ┌──────────────┼──────────────┐
+                              ▼              ▼              ▼
+                         wiki/*.md     index.md       log.md
+                         + .html       (updated)      (appended)</pre>
+
+<div class="card-grid">
+  <div class="card">
+    <span class="icon">📥</span>
+    <h4>kb-ingest</h4>
+    <p>Ingest knowledge: receive text/files → LLM structures content → dedup → QA → write files → generate Skill</p>
+  </div>
+  <div class="card">
+    <span class="icon">🔍</span>
+    <h4>kb-search</h4>
+    <p>Search knowledge: LLM extracts keywords → Engine executes search → returns matching Skill → LLM loads it</p>
+  </div>
+  <div class="card">
+    <span class="icon">📊</span>
+    <h4>kb-status</h4>
+    <p>Health check: run 3-tier QA → summarize issues → provide fix recommendations per entry</p>
+  </div>
+</div>
+
+<!-- ====== LLM: INGEST ====== -->
+<h2 id="llm-ingest">Ingest Knowledge — Using kb-ingest</h2>
+
+<p>This is the only way to add knowledge. The flow is consistent across all LLM platforms:</p>
+
+<div class="tab-bar">
+  <button class="active" onclick="switchTab(event,'ingest-copilot')">GitHub Copilot</button>
+  <button onclick="switchTab(event,'ingest-claude')">Claude Code</button>
+  <button onclick="switchTab(event,'ingest-opencode')">OpenCode</button>
+</div>
+
+<div id="ingest-copilot" class="tab-content active" style="margin-top:1.5rem;">
+<pre># In Copilot Chat:
+Use kb-ingest to import this document
+
+[Paste content or drag in a file]
+
+# Or specify a file already in raw/:
+Ingest raw/nginx-restart-guide.md into the knowledge base</pre>
+</div>
+
+<div id="ingest-claude" class="tab-content" style="margin-top:1.5rem;">
+<pre># In Claude Code:
+> /kb-ingest
+
+Claude will guide you through:
+1. Provide knowledge content (paste or file path)
+2. LLM auto-structures per template
+3. LLM checks completeness, prompts for missing sections
+4. Confirm and auto-ingest</pre>
+</div>
+
+<div id="ingest-opencode" class="tab-content" style="margin-top:1.5rem;">
+<pre># In OpenCode:
+Please use the kb-ingest skill to import this content:
+
+[Paste content]
+
+OpenCode will call python kb.py ingest to complete the process.</pre>
+</div>
+
+<ol class="step-list">
+  <li><strong>Provide source content</strong> — paste text or specify a file path in <code>raw/</code></li>
+  <li><strong>LLM structures it</strong> — extracts scenario, steps, verification, rollback; fills in missing parts</li>
+  <li><strong>Dedup check</strong> — semantic comparison against existing entries; decides new vs. version update</li>
+  <li><strong>Quality check</strong> — 3-tier validation; tells you exactly what's missing if it fails</li>
+  <li><strong>Ingestion complete</strong> — generates .md + .html + Skill file; updates index and log</li>
+</ol>
+
+<!-- ====== LLM: SEARCH ====== -->
+<h2 id="llm-search">Read Knowledge — Using kb-search</h2>
+
+<p>Search is the entry point for LLMs to read knowledge. The LLM doesn't scan files — it delegates to the Engine.</p>
+
+<div class="tab-bar">
+  <button class="active" onclick="switchTab(event,'search-copilot')">GitHub Copilot</button>
+  <button onclick="switchTab(event,'search-claude')">Claude Code</button>
+  <button onclick="switchTab(event,'search-opencode')">OpenCode</button>
+</div>
+
+<div id="search-copilot" class="tab-content active" style="margin-top:1.5rem;">
+<pre># In Copilot Chat:
+kb-search how to safely restart nginx in production
+
+# Copilot will:
+# 1. Call python kb.py search "nginx restart" --category infra-daily
+# 2. Return matching knowledge entries with scores
+# 3. Load the best-matching knowledge Skill
+# 4. Present the complete step-by-step guide</pre>
+</div>
+
+<div id="search-claude" class="tab-content" style="margin-top:1.5rem;">
+<pre># In Claude Code:
+> /kb-search nginx restart procedure
+
+Claude will search the KB and provide the operation guide.</pre>
+</div>
+
+<div id="search-opencode" class="tab-content" style="margin-top:1.5rem;">
+<pre># In OpenCode:
+Use kb-search to find the disk cleanup procedure</pre>
+</div>
+
+<div class="note success">
+  <strong>Token-efficient design:</strong> Search returns only title + summary (~50 tokens per result). The full Skill (~500 tokens) is loaded only after you confirm the match. No need to load 200 entries into context.
+</div>
+
+<!-- ====== LLM: CHECK ====== -->
+<h2 id="llm-check">Health Check — Using kb-status</h2>
+
+<p>Periodically have the LLM check knowledge base health:</p>
+
+<pre># Works the same on any LLM platform:
+kb-status
+
+# The LLM runs python kb.py check and returns:
+# Level A (Basic): Missing fields, dead links, syntax errors
+# Level B (Content): Non-executable steps, missing rollback
+# Level C (Comprehensive): Stale knowledge, orphan entries
+#
+# Each issue comes with a specific fix recommendation</pre>
+
+<div class="note warn">
+  <strong>💡 Recommendation:</strong> Run <code>kb-status</code> weekly to keep the knowledge base healthy.
+</div>
+
+<!-- ====== LLM: SETUP ====== -->
+<h2 id="llm-setup">Configure LLM Environment</h2>
+
+<p>The knowledge base supports three LLM providers. Configure at least one:</p>
+
+<table>
+  <thead><tr><th>Provider</th><th>Environment Variable</th><th>Default Model</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Claude</strong></td><td><code>ANTHROPIC_API_KEY</code></td><td>claude-sonnet-4-6</td></tr>
+    <tr><td><strong>DeepSeek</strong></td><td><code>DEEPSEEK_API_KEY</code></td><td>deepseek-chat</td></tr>
+    <tr><td><strong>Gemini</strong></td><td><code>GEMINI_API_KEY</code></td><td>gemini-2.5-pro</td></tr>
+  </tbody>
+</table>
+
+<h3>Claude Code</h3>
+<pre># In .claude/settings.json:
+{
+  "skills": {
+    "paths": ["E:/Program Files/Claude/knowledge/skills"]
+  }
+}</pre>
+
+<h3>GitHub Copilot</h3>
+<pre># In .github/copilot-instructions.md:
+Skills directory: skills/</pre>
+
+<h3>OpenCode</h3>
+<pre># In OpenCode settings, specify the Skill path:
+Skills path: E:/Program Files/Claude/knowledge/skills</pre>
+
+<!-- ====== CATEGORIES ====== -->
+<h2 id="categories">Category Reference</h2>
+
+<table>
+  <thead><tr><th>Category</th><th>Scope</th><th>Examples</th></tr></thead>
+  <tbody>
+    <tr><td><code>infra-daily</code></td><td>Restart, deploy, monitor, inspect, scale, backup</td><td>"Restart Production Nginx", "Disk Cleanup"</td></tr>
+    <tr><td><code>infra-violation</code></td><td>Security patches, config compliance, performance</td><td>"Fix OpenSSL CVE", "Resolve Port Conflict"</td></tr>
+    <tr><td><code>automation</code></td><td>CI/CD pipelines, cron scripts, alerting rules</td><td>"Jenkins Deploy Pipeline", "Auto-scale Script"</td></tr>
+    <tr><td><code>harbor</code></td><td>Harbor platform jobs and interfaces</td><td>"Harbor Job Trigger", "CLI Reference"</td></tr>
+  </tbody>
+</table>
+
+<!-- ====== TEMPLATE ====== -->
+<h2 id="template">Knowledge Template Reference</h2>
+
+<p>Every ingested knowledge entry follows this structure:</p>
+
+<pre>---
+id: kb-2026-0711-001
+title: "Knowledge Title"
+category: infra-daily
+tags: [keyword1, keyword2]
+author: "Author Name"
+created: 2026-07-11
+updated: 2026-07-11
+version: 1
+status: verified
+source_file: raw/source.md
+source_hash: sha256:abc123...
+diagram: |
+  flowchart TD
+    A[Step 1] --> B[Step 2]
+---
+
+# Knowledge Title
+
+## Scenario
+> When and why to use this knowledge
+
+## Prerequisites
+## Steps
+## Verification
+## Rollback
+## Related Knowledge
+## Execution Interfaces</pre>
+
+<!-- ====== TROUBLESHOOT ====== -->
+<h2 id="troubleshoot">Troubleshooting</h2>
+
+<div class="note warn">
+  <strong>Q: Uploaded a file but can't see it in the knowledge base?</strong><br>
+  A: Uploading to <code>raw/</code> only stores the source file. You must use <code>kb-ingest</code> in an LLM to process and integrate it into <code>wiki/</code>.
+</div>
+
+<div class="note warn">
+  <strong>Q: kb-search returns no results?</strong><br>
+  A: Check if any .md files exist in <code>wiki/</code>. If the KB is empty, use <code>kb-ingest</code> to add some knowledge first.
+</div>
+
+<div class="note warn">
+  <strong>Q: LLM says "Skill not available"?</strong><br>
+  A: Verify the <code>skills/</code> directory is correctly configured in your LLM platform's Skill path settings.
+</div>
+
+<div class="note warn">
+  <strong>Q: Flowchart not showing on knowledge page?</strong><br>
+  A: Flowcharts are generated by the LLM during ingestion. If the LLM was unavailable during ingest, no flowchart is generated. Re-ingest with an LLM available to add one.
+</div>
+
+<div class="note warn">
+  <strong>Q: How do I update existing knowledge?</strong><br>
+  A: Upload a new version of the source file → re-ingest with <code>kb-ingest</code>. The Engine auto-detects duplicates and creates <code>version+1</code> while preserving the old version.
+</div>
+
+<footer style="margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);text-align:center;color:var(--text-secondary);font-size:.85rem;">
+  <p>DevOps &amp; Infra Knowledge Base · LLM-Driven · Skill-Powered · 2026</p>
+</footer>
+
+</main>
+
+<script>
+function switchTab(event, tabId) {
+  const bar = event.target.closest('.tab-bar');
+  bar.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const container = bar.parentElement;
+  container.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+const sections = document.querySelectorAll('h2[id]');
+const navLinks = document.querySelectorAll('nav.sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  navLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+});
+</script>
+
+</body>
+</html>

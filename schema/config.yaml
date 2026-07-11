@@ -1,0 +1,44 @@
+# DevOps & Infra 知识库配置
+# 版本: 0.1.0
+
+knowledge_base:
+  name: "DevOps & Infra 知识库"
+  version: "0.1.0"
+  categories:
+    - infra-daily
+    - infra-violation
+    - automation
+    - harbor
+
+llm:
+  default: claude
+  providers:
+    claude:
+      type: anthropic
+      api_key_env: ANTHROPIC_API_KEY
+      default_model: claude-sonnet-4-6
+    deepseek:
+      type: openai_compatible
+      api_key_env: DEEPSEEK_API_KEY
+      base_url: https://api.deepseek.com
+      default_model: deepseek-chat
+    gemini:
+      type: google
+      api_key_env: GEMINI_API_KEY
+      default_model: gemini-2.5-pro
+
+harbor:
+  mcp:
+    enabled: false
+    server_command: "harbor-mcp"
+  cli:
+    enabled: true
+    binary: "harbor"
+    auth_method: token
+
+quality:
+  freshness_warn_days: 40
+
+web:
+  host: "0.0.0.0"
+  port: 8000
